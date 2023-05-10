@@ -17,6 +17,11 @@ Constraint  :: #type int;
 
 Program_Builder :: struct
 {
+	//
+	// @Leak, we are not supplying methods for freeing this yet
+	//   One can just put the temporary allocator in the context and set a mark to restore it after.
+	//
+
 	Factor_Of_Variable :: struct
 	{
 		var   : Variable; @Indexes(Program_Builder.variables);
