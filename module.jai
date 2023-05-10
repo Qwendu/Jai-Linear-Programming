@@ -1,4 +1,4 @@
-PRINT_SIMPLEX :: true;
+#module_parameters(PRINT_SIMPLEX : bool = false);
 
 
 Variable    :: #type s32;
@@ -361,7 +361,7 @@ simplex :: (tab : *Tableau)
 		}
 	}
 	
-	print("%", builder_to_string(*builder));
+	#if PRINT_SIMPLEX print("%", builder_to_string(*builder));
 }
 
 /*
