@@ -4,31 +4,39 @@ LP :: #import,file "module.jai";
 
 main :: ()
 {
-	program := LP.Program.
-	{
-		variables = .[
-			"k",
-			"t1",
-			"t2"
-		],
-		constraints = .[
-			.{.[ 0.5, -1,  0], 0},
-			.{.[ 0.2,  0, -2], 0},
-			.{.[-0.5,  1,  0], 0},
-			.{.[-0.2,  0, -2], 0},
-			.{.[ 0  , -1,  0], 0},
-			.{.[ 0  ,  0, -1], 0},
-			.{.[ 0  ,  1,  0], 1},
-			.{.[ 0  ,  0,  1], 1},
-			.{.[-1  ,  0,  0], 0},
-		],
-		value = .[1, 0, 0]
-	};
 
-	value := LP.solve(*program);
-	
+	builder : LP.Program_Builder;
+	k  := LP.add_Variable(*builder, "k", min = 0);
+	t1 := LP.add_Variable(*builder, "t1", min = 0, max = 1);
+	t2 := LP.add_Variable(*builder, "t2", min = 0, max = 1);
+	t3 := LP.add_Variable(*builder, "t3", min = 0, max = 1);
+
+	LP.set_Objective(*builder, .MAX);
+	LP.set_Contribution_Objective(*builder, k, 1);
+	LP.set_Contribution_Objective(*builder, t1, 0);
+
+	force_x  := LP.add_Constraint(*builder, name = "force_x", leq_or_geq = .EQ);
+	force_y  := LP.add_Constraint(*builder, name = "force_y", leq_or_geq = .EQ);
+
+
+	LP.set_Constant\   _Constraint(*builder, force_x, 0);
+	LP.set_Contribution_Constraint(*builder, force_x, k,   1);
+	LP.set_Contribution_Constraint(*builder, force_x, t1, -1);
+	LP.set_Contribution_Constraint(*builder, force_x, t3, -0.3);
+
+	LP.set_Constant\   _Constraint(*builder, force_y, 0);
+	LP.set_Contribution_Constraint(*builder, force_y, k,   0.2);
+	LP.set_Contribution_Constraint(*builder, force_y, t2, -1.0);
+	LP.set_Contribution_Constraint(*builder, force_y, t3, -0.2);
+
 	push_printer(LP.print_Program);
-	print("%\n", program);
+	print("%\n", builder);
+	standard := LP.standard_Form(*builder);
+	print("Standard Form\n%\n", standard);
+	tab := LP.generate_Tableau(*standard);
+	print("Tableau\n%\n", <<tab);
+	LP.simplex(tab);
+	print("Solved \n%\n", <<tab);
 }
 
 
@@ -69,3 +77,34 @@ push_printer :: ($f : (*String_Builder, Any, *void) -> bool, d : *void = null) #
 }
 
 #import "Basic";
+/*
+	k  := LP.add_Variable(*builder, "k", min = 0);
+	t1 := LP.add_Variable(*builder, "t1", min = 0, max = 1);
+	t2 := LP.add_Variable(*builder, "t2", min = 0, max = 1);
+
+	LP.set_Objective(*builder, .MIN);
+	LP.set_Contribution_Objective(*builder, k, 1);
+	LP.set_Contribution_Objective(*builder, t1, 0);
+
+	force_x  := LP.add_Constraint(*builder, name = "force_x", leq_or_geq = .EQ);
+	force_y  := LP.add_Constraint(*builder, name = "force_y", leq_or_geq = .EQ);
+
+
+	LP.set_Constant\   _Constraint(*builder, force_x, 0);
+	LP.set_Contribution_Constraint(*builder, force_x, k,   1);
+	LP.set_Contribution_Constraint(*builder, force_x, t1, -1);
+	LP.set_Contribution_Constraint(*builder, force_x, t2, -0);
+
+	LP.set_Constant\   _Constraint(*builder, force_y, 0);
+	LP.set_Contribution_Constraint(*builder, force_y, k,   0.2);
+	LP.set_Contribution_Constraint(*builder, force_y, t1, -0.0);
+	LP.set_Contribution_Constraint(*builder, force_y, t2, -1.0);
+
+	/*
+	torque_z := LP.add_Constraint(*builder, name = "torque_z", leq_or_geq = .EQ);
+	LP.set_Constant\   _Constraint(*builder, torque_z, 0);
+	LP.set_Contribution_Constraint(*builder, torque_z, k,  0);
+	LP.set_Contribution_Constraint(*builder, torque_z, t1, -0.2);
+	LP.set_Contribution_Constraint(*builder, torque_z, t2, 0.1);
+	*/
+*/
