@@ -1,50 +1,53 @@
-LP :: #import,file "../module.jai";
+LP :: #import,file "../module.jai"(true);
 
-// This example optimizes Thruster Allocation for the setup
-// t1 := Vector2.{1, 0}
-// t2 := Vector2.{0, 1}
-// t3 := Vector2.{0.3, 0.2}
+// This example optimizes Thruster Allocation
+// And calculates how well a configuration of thrusters
+// can move a the direction
+// ti_f is the force the i-th thruster can produce
 // 
-// And calculates how well it can move in the direction
-// k:= Vector2.{1, 0.2}
+
+// direction is the direction we want to move in
 
 // Solution:
 //
-// Optimum of value 1.3
-// Solution for k = 1.3
-// Solution for t1 = 1
-// Solution for t2 = 0.06
-// Solution for t3 = 1
+// Optimum of value 1
+// Solution for k = 1
+// Solution for t_0 = 1
+// Solved with value: 1
 
 
 
 
 main :: ()
 {
-
+	direction := Vector2.{ 1, 0};
+	thrusters :: Vector2.[
+		.{ 1, 0},
+		.{ 0, 1},
+		.{-1, 0},
+		.{ 0,-1},
+	];
+	thruster_vars : [thrusters.count] LP.Variable;
+	
+	
 	builder : LP.Program_Builder;
 	k  := LP.add_Variable(*builder, "k", min = 0);
-	t1 := LP.add_Variable(*builder, "t1", min = 0, max = 1);
-	t2 := LP.add_Variable(*builder, "t2", min = 0, max = 1);
-	t3 := LP.add_Variable(*builder, "t3", min = 0, max = 1);
+	for thrusters  thruster_vars[it_index] = LP.add_Variable(*builder, tprint("t_%", it_index), min = 0, max = 1);
 
 	LP.set_Objective(*builder, .MAX);
 	LP.set_Contribution_Objective(*builder, k, 1);
-	LP.set_Contribution_Objective(*builder, t1, 0);
 
 	force_x  := LP.add_Constraint(*builder, name = "force_x", leq_or_geq = .EQ);
 	force_y  := LP.add_Constraint(*builder, name = "force_y", leq_or_geq = .EQ);
 
 
 	LP.set_Constant\   _Constraint(*builder, force_x, 0);
-	LP.set_Contribution_Constraint(*builder, force_x, k,   1);
-	LP.set_Contribution_Constraint(*builder, force_x, t1, -1);
-	LP.set_Contribution_Constraint(*builder, force_x, t3, -0.3);
+	LP.set_Contribution_Constraint(*builder, force_x, k, -direction.x);
+	for thrusters  LP.set_Contribution_Constraint(*builder, force_x, thruster_vars[it_index],   it.x);
 
 	LP.set_Constant\   _Constraint(*builder, force_y, 0);
-	LP.set_Contribution_Constraint(*builder, force_y, k,   0.2);
-	LP.set_Contribution_Constraint(*builder, force_y, t2, -1.0);
-	LP.set_Contribution_Constraint(*builder, force_y, t3, -0.2);
+	LP.set_Contribution_Constraint(*builder, force_y, k, -direction.y);
+	for thrusters  LP.set_Contribution_Constraint(*builder, force_y, thruster_vars[it_index],   it.y);
 
 	push_printer(LP.print_Program);
 	print("%\n", builder);
@@ -52,8 +55,8 @@ main :: ()
 	print("Standard Form\n%\n", standard);
 	tab := LP.generate_Tableau(*standard);
 	print("Tableau\n%\n", <<tab);
-	LP.simplex(tab);
-	print("Solved \n%\n", <<tab);
+	val, solution := LP.simplex(tab);
+	print("Solved with value: %\n", val);
 }
 
 
@@ -94,4 +97,4 @@ push_printer :: ($f : (*String_Builder, Any, *void) -> bool, d : *void = null) #
 }
 
 #import "Basic";
-
+#import "Math";
