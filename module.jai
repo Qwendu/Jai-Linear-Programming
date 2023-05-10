@@ -1,17 +1,25 @@
-#module_parameters(PRINT_SIMPLEX : bool = false);
+/*
 
+This modules solve Linear Programming Problems using the 
+Simplex Method:
 
-Variable    :: #type s32;
-Constraint  :: #type s32;
+https://en.wikipedia.org/wiki/Simplex_algorithm
 
+Usage code can be found in examples\
 
+*/
+
+#module_parameters(PRINT_SIMPLEX : bool = false, EPS : float = 0.00001);
+
+Variable    :: #type int;
+Constraint  :: #type int;
 
 
 Program_Builder :: struct
 {
 	Factor_Of_Variable :: struct
 	{
-		var   : Variable; @Variablees(Program_Builder.variables);
+		var   : Variable; @Indexes(Program_Builder.variables);
 		value : float;
 	};
 
@@ -144,7 +152,7 @@ standard_Form :: (builder : *Program_Builder) -> Program_Builder
 	}
 
 	// We dont need the upper bounds, they are constraints!
-	// But we keep them anyways to make it more clear
+	// But we keep them anyways to make it more clear that they still apply
 	for builder.upper_bounds
 	{
 		if it.value == FLOAT32_INFINITY  continue;
@@ -468,6 +476,7 @@ print_Program :: (builder : *String_Builder, any : Any, data : *void) -> bool
 	return false;
 }
 
-EPS :: 0.00001;
+
+
 #import "Math";
 #import "Basic";
