@@ -242,6 +242,10 @@ generate_Tableau :: (builder : *Program_Builder) -> *Tableau
 
 canonicalize :: (tab : *Tableau)
 {
+	//
+	// Canonical form is different than the standard form
+	// But only seems to differ by this?
+	//
 	for 0..tab.Cols-1
 	{
 		tab.data[it] *= -1;
