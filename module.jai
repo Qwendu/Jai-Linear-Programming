@@ -257,7 +257,7 @@ canonicalize :: (tab : *Tableau)
 	}
 }
 
-simplex :: (tab : *Tableau)
+simplex :: (tab : *Tableau) -> (value : float, solution : [] float)
 {
 	#if PRINT_SIMPLEX
 	{
@@ -344,6 +344,23 @@ simplex :: (tab : *Tableau)
 				lowest = abs(val);
 			}
 		}
+		if lowest_row == -1 
+		{
+			// If we have no positive value, then we pick the most negative value
+			// To pivot around.
+			// Wikipedia said that all should be fine so idk, this seems like a good one.
+			most_negative_row := -1;
+			most_negative     := 0.0;
+			for 1..tab.Rows-1  
+			{
+				if tab.data[it * tab.Cols + most_negative_col] < most_negative 
+				{
+					most_negative_row = it;
+					most_negative = tab.data[it * tab.Cols + most_negative_col];
+				}
+			}
+			return most_negative_row, most_negative_col, false;
+		}
 		return lowest_row, most_negative_col, false;
 	}
 
@@ -361,8 +378,11 @@ simplex :: (tab : *Tableau)
 	//
 	// Extract solution
 	//
-	optimim_value := tab.data[0 * tab.Cols + tab.Cols - 1];
-	#if PRINT_SIMPLEX print_to_builder(*builder, "Optimum of value %\n", optimim_value);
+	optimum_value := tab.data[0 * tab.Cols + tab.Cols - 1];
+	#if PRINT_SIMPLEX print_to_builder(*builder, "Optimum of value %\n", optimum_value);
+	
+	result_array : [] float;
+	
 	for col: 0..tab.Cols-2
 	{
 		number_non_zeroes := 0;
@@ -384,6 +404,9 @@ simplex :: (tab : *Tableau)
 	}
 	
 	#if PRINT_SIMPLEX print("%", builder_to_string(*builder));
+	
+
+	return optimum_value, result_array;
 }
 
 
