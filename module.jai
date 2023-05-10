@@ -1,12 +1,10 @@
 /*
-
 This modules solve Linear Programming Problems using the 
 Simplex Method:
 
 https://en.wikipedia.org/wiki/Simplex_algorithm
 
 Usage code can be found in examples\
-
 */
 
 #module_parameters(PRINT_SIMPLEX : bool = false, EPS : float = 0.00001);
@@ -408,7 +406,6 @@ simplex :: (tab : *Tableau) -> (value : float, solution : [] float)
 
 	return optimum_value, result_array;
 }
-
 
 
 
